@@ -29,20 +29,23 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
+// var chatLog = {
+//   results: [
+//     {
+//       'username': 'James',
+//       'text': 'First!',
+//       'createdAt': '2017-10-21T00:46:46:168Z',
+//       'roomname': 'lobby'
+//     },
+//     {
+//       'username': 'Enkhtushig',
+//       'text': 'Second...',
+//       'createdAt': '2017-10-21T00:46:46:330Z',
+//       'roomname': 'lobby'
+//     }]
+// };
 var chatLog = {
-  results: [
-    {
-      'username': 'James',
-      'text': 'First!',
-      'createdAt': '2017-10-21T00:46:46:168Z',
-      'roomname': 'lobby'
-    },
-    {
-      'username': 'Enkhtushig',
-      'text': 'Second...',
-      'createdAt': '2017-10-21T00:46:46:330Z',
-      'roomname': 'lobby'
-    }]
+  results: []
 };
 
 var requestHandler = function(request, response) {
@@ -62,12 +65,24 @@ var requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
+  console.log(request.url !== '/chatterbox/classes/messages' || request.url !== '/classes/messages');
+  
+  var validURL = false;
+  
+  if (request.url === '/chatterbox/classes/messages' || request.url === '/classes/messages') {
+    validURL = true;
+  }
 
   // The outgoing status.
-  var statusCode = 200;
+  // var statusCode = 200;
 
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
+  
+  if (!validURL) {
+    response.writeHead(404, headers);
+    response.end();
+  }
 
   // Tell the client we are sending them plain text.
   //
@@ -79,9 +94,10 @@ var requestHandler = function(request, response) {
   // which includes the status and all headers.
   
   if (request.method === 'OPTIONS') {
-    response.writeHead(statusCode, headers);
+    response.writeHead(200, headers);
+    response.end();
   } else if (request.method === 'GET') {
-    response.writeHead(statusCode, headers);
+    response.writeHead(200, headers);
     var toSend = JSON.stringify(chatLog);
     response.end(toSend);
   } else if (request.method === 'POST') {
@@ -99,6 +115,7 @@ var requestHandler = function(request, response) {
     console.log(response.finished);
   } else {
     response.writeHead(404, headers);
+    response.end();
   }
 
   // Make sure to always call response.end() - Node may not send
@@ -108,7 +125,7 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('\nHello, World!');
+  // response.end('\nHello, World!');
 };
 
 module.exports.requestHandler = requestHandler;
