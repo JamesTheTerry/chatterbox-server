@@ -108,12 +108,11 @@ var requestHandler = function(request, response) {
     console.log('GET Response Finished: ', response.finished);
   } else if (request.method === 'POST') {
     response.writeHead(201, headers);
-    var body = [];
+    var body = '';
     request.on('data', (chunk) => {
-      body.push(chunk);
-    }).on('end', () => {
-      console.log('Before Body:\n', body);
-      body = Buffer.concat(body).toString();
+      body += chunk;
+    });
+    request.on('end', () => {
       console.log('Body:\n', body);
       body = JSON.parse(body);
       body.objectId = globalId;
