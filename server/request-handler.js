@@ -29,6 +29,8 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
+var globalId = 1;
+
 // var chatLog = {
 //   results: [
 //     {
@@ -44,9 +46,13 @@ this file and include it in basic-server.js so that it actually works.
 //       'roomname': 'lobby'
 //     }]
 // };
+
 var chatLog = {
   results: []
 };
+// var chatLog = {
+//   results: []
+// };
 
 var requestHandler = function(request, response) {
   // console.log(request);
@@ -65,7 +71,6 @@ var requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
-  console.log(request.url !== '/chatterbox/classes/messages' || request.url !== '/classes/messages');
   
   var validURL = false;
   
@@ -79,10 +84,10 @@ var requestHandler = function(request, response) {
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
   
-  if (!validURL) {
-    response.writeHead(404, headers);
-    response.end();
-  }
+  // if (!validURL) {
+  //   response.writeHead(404, headers);
+  //   response.end();
+  // }
 
   // Tell the client we are sending them plain text.
   //
@@ -100,6 +105,7 @@ var requestHandler = function(request, response) {
     response.writeHead(200, headers);
     var toSend = JSON.stringify(chatLog);
     response.end(toSend);
+    console.log('GET Response Finished: ', response.finished);
   } else if (request.method === 'POST') {
     response.writeHead(201, headers);
     var body = [];
@@ -108,11 +114,13 @@ var requestHandler = function(request, response) {
     }).on('end', () => {
       body = Buffer.concat(body).toString();
       console.log('Body:\n', body);
-      chatLog.results.push(JSON.parse(body));
+      body = JSON.parse(body);
+      body.objectId = globalId;
+      globalId++;
+      chatLog.results.push(body);
     });
     
-    response.end();
-    console.log(response.finished);
+    response.end('{"success" : "Created Successfully", "status": 201, "thisIs": "hogwash"}');
   } else {
     response.writeHead(404, headers);
     response.end();
