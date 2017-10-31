@@ -84,10 +84,10 @@ var requestHandler = function(request, response) {
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
   
-  // if (!validURL) {
-  //   response.writeHead(404, headers);
-  //   response.end();
-  // }
+  if (!validURL) {
+    response.writeHead(404, headers);
+    response.end();
+  }
 
   // Tell the client we are sending them plain text.
   //
@@ -112,6 +112,7 @@ var requestHandler = function(request, response) {
     request.on('data', (chunk) => {
       body.push(chunk);
     }).on('end', () => {
+      console.log('Before Body:\n', body);
       body = Buffer.concat(body).toString();
       console.log('Body:\n', body);
       body = JSON.parse(body);
